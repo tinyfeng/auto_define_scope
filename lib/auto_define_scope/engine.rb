@@ -1,9 +1,9 @@
 module AutoDefineScope
-  module Engine
+  class Engine < ::Rails::Engine
     isolate_namespace AutoDefineScope
 
     ActiveSupport.on_load :active_record do
-      include AutoDefineScope::ActiveRecordExtension
+      extend AutoDefineScope::ActiveRecordExtension
     end
   end
 end

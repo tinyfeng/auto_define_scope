@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    auto_define_scope (0.0.1)
+    auto_define_scope (0.0.2)
       filterrific (>= 5.1.0)
 
 GEM
