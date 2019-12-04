@@ -50,12 +50,12 @@ module AutoDefineScope
         @auto_define_scopes ||= []
         scope_name = "#{type}_#{joins_params_array.last&.to_s&.+ '_'}#{c}"
         @auto_define_scopes << scope_name
-        scope scope_name, ->(v){ joins(joins_params).where("#{table_name}.#{c} #{OPERATE_SQL[type]}", value_of_type(v, type)) } 
+        scope scope_name, ->(v){ joins(joins_params).where("#{table_name}.#{c} #{OPERATE_SQL[type]}", sql_of_type(v, type)) } 
       end
       nil
     end
 
-    def value_of_type value, type
+    def sql_of_type value, type
       type == :with ? value : "%#{value}%"
     end
   end
