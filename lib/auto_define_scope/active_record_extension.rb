@@ -25,7 +25,7 @@ module AutoDefineScope
       @auto_define_scopes << scope_name
     end
 
-    private
+    protected
     def generate_cope columns, type, klass = self, joins_params_array = []
       columns.each do |c|
         if c.is_a?(Hash)
@@ -50,13 +50,12 @@ module AutoDefineScope
         @auto_define_scopes ||= []
         scope_name = "#{type}_#{joins_params_array.last&.to_s&.+ '_'}#{c}"
         @auto_define_scopes << scope_name
-        scope scope_name, ->(v){ joins(joins_params).where("#{table_name}.#{c} #{OPERATE_SQL[type]}", sql_of_type(v, type)) } 
+        scope scope_name, ->(v) do
+          value = type == :with ? v : "%#{v}%"
+          joins(joins_params).where("#{table_name}.#{c} #{OPERATE_SQL[type]}", value) 
+        end
       end
       nil
-    end
-
-    def sql_of_type value, type
-      type == :with ? value : "%#{value}%"
     end
   end
 end
