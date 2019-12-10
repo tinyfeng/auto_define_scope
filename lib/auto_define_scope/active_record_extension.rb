@@ -5,11 +5,11 @@ module AutoDefineScope
 
     # For example, CustomerAgentHistory include this
     # columns is a array like ["status", "p_way", {customer_agent: ["code", "name", agent: :province_id]}]
-    def search_columns *columns
+    def search_columns(*columns)
       generate_cope columns, :search
     end
 
-    def with_columns *columns
+    def with_columns(*columns)
       generate_cope columns, :with
     end
 
@@ -26,7 +26,7 @@ module AutoDefineScope
     end
 
     protected
-    def generate_cope columns, type, klass = self, joins_params_array = []
+    def generate_cope(columns, type, klass = self, joins_params_array = [])
       columns.each do |c|
         if c.is_a?(Hash)
           c.keys.each do |k|
@@ -45,17 +45,28 @@ module AutoDefineScope
           end
           next
         end
+        column_type = klass.columns_hash[c.to_s]&.type
+        raise "scopes defined error, not found column('#{c}') for table #{klass.table_name}" if column_type.nil?
         joins_params = joins_params_array.reverse.inject() { |a, n| { n => a } }
         table_name = klass.table_name
         @auto_define_scopes ||= []
         scope_name = "#{type}_#{joins_params_array.last&.to_s&.+ '_'}#{c}"
         @auto_define_scopes << scope_name
         scope scope_name, ->(v) do
-          value = type == :with ? v : "%#{v}%"
+          value = case column_type
+                  when :integer
+                    v.to_i
+                  when :string
+                    v.to_s
+                  else
+                    v
+                  end
+          value = type == :with ? value : "%#{value}%"
           joins(joins_params).where("#{table_name}.#{c} #{OPERATE_SQL[type]}", value) 
         end
       end
       nil
     end
+
   end
 end
